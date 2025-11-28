@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Оценка задачи</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            padding: 20px;
+        }
+        
+        h2 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+        
+        label .required {
+            color: #e53935;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--tg-theme-hint-color, #999999);
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #3390ec);
+        }
+        
+        .error-message {
+            color: #e53935;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #999999);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Укажите оценку:</h2>
+    
+    <form id="estimateForm">
+        <input type="hidden" id="task_number" name="task_number">
+        
+        <div class="form-group">
+            <label>Оценка от: <span class="required">*</span></label>
+            <input type="number" 
+                   id="estimate_from" 
+                   name="estimate_from" 
+                   step="0.01" 
+                   min="0" 
+                   placeholder="Например: 2.5"
+                   required>
+            <div class="hint">Минимальная оценка в часах</div>
+            <div class="error-message" id="error_from">Обязательное поле</div>
+        </div>
+        
+        <div class="form-group">
+            <label>Оценка до: <span class="required">*</span></label>
+            <input type="number" 
+                   id="estimate_to" 
+                   name="estimate_to" 
+                   step="0.01" 
+                   min="0" 
+                   placeholder="Например: 4"
+                   required>
+            <div class="hint">Максимальная оценка в часах</div>
+            <div class="error-message" id="error_to">Обязательное поле</div>
+        </div>
+        
+        <div class="form-group">
+            <label>Комментарий:</label>
+            <textarea id="comment" 
+                      name="comment" 
+                      maxlength="250" 
+                      rows="4" 
+                      placeholder="Дополнительные пояснения (не обязательно)"></textarea>
+            <div class="hint">Максимум 250 символов</div>
+        </div>
+    </form>
+    
+    <script>
+        let tg = window.Telegram.WebApp;
+        
+        // Разворачиваем приложение на весь экран
+        tg.expand();
+        
+        // Получаем номер задачи из URL
+        let urlParams = new URLSearchParams(window.location.search);
+        let taskNumber = urlParams.get('task');
+        document.getElementById('task_number').value = taskNumber;
+        
+        // Настраиваем главную кнопку
+        tg.MainButton.setText('Отправить');
+        tg.MainButton.show();
+        tg.MainButton.onClick(function() {
+            submitForm();
+        });
+        
+        // Функция валидации и отправки
+        function submitForm() {
+            let estimateFrom = document.getElementById('estimate_from').value.trim();
+            let estimateTo = document.getElementById('estimate_to').value.trim();
+            
+            // Скрываем все ошибки
+            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+            
+            let hasErrors = false;
+            
+            // Проверяем заполнение обязательных полей
+            if (!estimateFrom || parseFloat(estimateFrom) <= 0) {
+                document.getElementById('error_from').classList.add('show');
+                hasErrors = true;
+            }
+            
+            if (!estimateTo || parseFloat(estimateTo) <= 0) {
+                document.getElementById('error_to').classList.add('show');
+                hasErrors = true;
+            }
+            
+            // Проверяем, что "до" больше "от"
+            if (!hasErrors && parseFloat(estimateTo) < parseFloat(estimateFrom)) {
+                document.getElementById('error_to').textContent = '"Оценка до" не может быть меньше "Оценка от"';
+                document.getElementById('error_to').classList.add('show');
+                hasErrors = true;
+            }
+            
+            if (hasErrors) {
+                tg.HapticFeedback.notificationOccurred('error');
+                return;
+            }
+            
+            // Собираем данные
+            let data = {
+                form_type: 'estimate',
+                task_number: taskNumber,
+                estimate_from: parseFloat(estimateFrom),
+                estimate_to: parseFloat(estimateTo),
+                comment: document.getElementById('comment').value.trim()
+            };
+            
+            // Отправляем данные в 1С через Telegram
+            tg.sendData(JSON.stringify(data));
+            tg.close();
+        }
+        
+        // Обработка кнопки "Назад" в Telegram
+        tg.BackButton.show();
+        tg.BackButton.onClick(function() {
+            tg.close();
+        });
+        
+        // Показываем ready-статус
+        tg.ready();
+    </script>
+</body>
+</html>
