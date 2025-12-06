@@ -1,181 +1,251 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Оценка задачи</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        h2 { margin-bottom: 20px; font-size: 20px; color: #2196F3; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
-        label .required { color: #e53935; }
-        input, textarea {
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .task-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .task-info strong {
+            color: #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .range-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
-        input:focus, textarea:focus {
+        
+        input[type="number"]:focus,
+        textarea:focus {
             outline: none;
-            border-color: #2196F3;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-        .error-message {
-            color: #e53935;
-            font-size: 12px;
-            margin-top: 5px;
-            display: none;
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
         }
-        .error-message.show { display: block; }
-        .hint { font-size: 12px; color: #999; margin-top: 4px; }
-        .submit-btn {
+        
+        button {
             width: 100%;
-            padding: 14px;
-            background: #2196F3;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
-        .submit-btn:hover { background: #1976D2; }
-        .submit-btn:disabled {
-            background: #ccc;
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
         }
-        .success-message {
-            display: none;
-            padding: 20px;
-            background: #4CAF50;
-            color: white;
-            border-radius: 8px;
-            text-align: center;
+        
+        .message {
+            padding: 15px;
+            border-radius: 10px;
             margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
         }
     </style>
 </head>
 <body>
-    <h2>📝 Укажите оценку:</h2>
-    <form id="estimateForm">
-        <input type="hidden" id="task_number" name="task_number">
+    <div class="container">
+        <h2>📝 Оценка задачи</h2>
         
-        <div class="form-group">
-            <label>Оценка от (часы): <span class="required">*</span></label>
-            <input type="number" id="estimate_from" step="0.01" min="0" placeholder="Например: 2.5" required>
-            <div class="hint">Минимальная оценка в часах</div>
-            <div class="error-message" id="error_from">Обязательное поле</div>
+        <div class="task-info">
+            <strong>Задача №:</strong> <span id="taskNumber"></span><br>
+            <strong>Исполнитель:</strong> @<span id="userName"></span>
         </div>
         
-        <div class="form-group">
-            <label>Оценка до (часы): <span class="required">*</span></label>
-            <input type="number" id="estimate_to" step="0.01" min="0" placeholder="Например: 4" required>
-            <div class="hint">Максимальная оценка в часах</div>
-            <div class="error-message" id="error_to">Обязательное поле</div>
-        </div>
+        <form id="estimateForm">
+            <div class="form-group">
+                <label>Оценка трудозатрат (часы):</label>
+                <div class="range-inputs">
+                    <div>
+                        <label style="font-size: 12px; color: #888;">От:</label>
+                        <input type="number" id="estimate_from" step="0.5" min="0" required>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #888;">До:</label>
+                        <input type="number" id="estimate_to" step="0.5" min="0" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Комментарий (необязательно):</label>
+                <textarea id="comment" placeholder="Опишите особенности задачи..."></textarea>
+            </div>
+            
+            <button type="submit" id="submitBtn">Отправить оценку</button>
+        </form>
         
-        <div class="form-group">
-            <label>Комментарий:</label>
-            <textarea id="comment" maxlength="250" rows="4" placeholder="Дополнительные пояснения (не обязательно)"></textarea>
-            <div class="hint">Максимум 250 символов</div>
+        <div class="message success" id="successMsg">
+            ✅ Оценка успешно отправлена!<br>
+            <small>Можете закрыть эту страницу</small>
         </div>
-        
-        <button type="submit" class="submit-btn" id="submitBtn">Отправить оценку</button>
-    </form>
-    
-    <div class="success-message" id="successMsg">
-        ✅ Оценка успешно отправлена!<br>Можете закрыть эту страницу.
+        <div class="message error" id="errorMsg"></div>
     </div>
-
+    
     <script>
-        // Получаем параметры из URL
         const urlParams = new URLSearchParams(window.location.search);
         const taskNumber = urlParams.get('task');
-        const baseURL = urlParams.get('base_url'); // URL сервера 1С
+        const userName = urlParams.get('user');
+        const token = urlParams.get('token');
         
-        document.getElementById('task_number').value = taskNumber;
+        // ВАЖНО: замените на ваш реальный URL
+       const API_URL = 'https://rdsrv.1000th.ru/our_crm_dev_ilya/hs/formhandler/submit';
+        
+        document.getElementById('taskNumber').textContent = taskNumber;
+        document.getElementById('userName').textContent = userName;
         
         document.getElementById('estimateForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            let estimateFrom = document.getElementById('estimate_from').value.trim();
-            let estimateTo = document.getElementById('estimate_to').value.trim();
+            const estimateFrom = parseFloat(document.getElementById('estimate_from').value);
+            const estimateTo = parseFloat(document.getElementById('estimate_to').value);
+            const comment = document.getElementById('comment').value.trim();
             
-            // Очищаем ошибки
-            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
-            
-            let hasErrors = false;
-            
-            if (!estimateFrom || parseFloat(estimateFrom) <= 0) {
-                document.getElementById('error_from').classList.add('show');
-                hasErrors = true;
-            }
-            
-            if (!estimateTo || parseFloat(estimateTo) <= 0) {
-                document.getElementById('error_to').classList.add('show');
-                hasErrors = true;
-            }
-            
-            if (!hasErrors && parseFloat(estimateTo) < parseFloat(estimateFrom)) {
-                document.getElementById('error_to').textContent = '"Оценка до" не может быть меньше "Оценка от"';
-                document.getElementById('error_to').classList.add('show');
-                hasErrors = true;
-            }
-            
-            if (hasErrors) {
+            if (estimateTo < estimateFrom) {
+                showError('Оценка "До" не может быть меньше "От"');
                 return;
             }
             
-            // Формируем данные
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Отправка...';
+            
             const data = {
                 form_type: 'estimate',
                 task_number: taskNumber,
-                estimate_from: parseFloat(estimateFrom),
-                estimate_to: parseFloat(estimateTo),
-                comment: document.getElementById('comment').value.trim()
+                user_name: userName,
+                token: token,
+                estimate_from: estimateFrom,
+                estimate_to: estimateTo,
+                comment: comment
             };
             
-            // Отключаем кнопку
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.textContent = 'Отправка...';
-            
-            // Отправляем данные на сервер 1С
             try {
-                const response = await fetch(baseURL + '/hs/webapp/submit', {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(data)
                 });
                 
-                if (response.ok) {
-                    // Показываем успех
-                    document.getElementById('estimateForm').style.display = 'none';
-                    document.getElementById('successMsg').style.display = 'block';
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess();
                 } else {
-                    alert('Ошибка отправки данных. Попробуйте ещё раз.');
-                    btn.disabled = false;
-                    btn.textContent = 'Отправить оценку';
+                    showError(result.error || 'Ошибка отправки');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Отправить оценку';
                 }
+                
             } catch (error) {
-                alert('Ошибка соединения с сервером.');
-                btn.disabled = false;
-                btn.textContent = 'Отправить оценку';
+                showError('Ошибка соединения с сервером');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Отправить оценку';
             }
         });
+        
+        function showSuccess() {
+            document.getElementById('successMsg').style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('estimateForm').style.display = 'none';
+        }
+        
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = '❌ ' + message;
+            errorMsg.style.display = 'block';
+        }
     </script>
 </body>
 </html>
