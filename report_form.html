@@ -1,140 +1,311 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отчет о работе</title>
+    <title>Отчет о выполнении</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
             padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        h2 { margin-bottom: 20px; font-size: 20px; color: #2196F3; }
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
-        label .required { color: #e53935; }
-        input, textarea {
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .task-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .task-info strong {
+            color: #11998e;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #555;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
-        textarea { min-height: 200px; resize: vertical; font-family: monospace; }
-        input:focus, textarea:focus { outline: none; border-color: #2196F3; }
-        .error-message { color: #e53935; font-size: 12px; margin-top: 5px; display: none; }
-        .error-message.show { display: block; }
-        .hint { font-size: 12px; color: #999; margin-top: 4px; }
-        .submit-btn {
+        
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #11998e;
+            box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        button {
             width: 100%;
-            padding: 14px;
-            background: #4CAF50;
+            padding: 16px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
-        .submit-btn:hover { background: #45a049; }
-        .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
-        .success-message {
-            display: none;
-            padding: 20px;
-            background: #4CAF50;
-            color: white;
-            border-radius: 8px;
-            text-align: center;
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(17, 153, 142, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 10px;
             margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .quick-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .quick-btn {
+            padding: 10px;
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .quick-btn:hover {
+            background: #11998e;
+            color: white;
+            border-color: #11998e;
+        }
+        
+        .quick-btn.active {
+            background: #11998e;
+            color: white;
+            border-color: #11998e;
         }
     </style>
 </head>
 <body>
-    <h2>📋 Отчет о работе:</h2>
-    <form id="reportForm">
-        <input type="hidden" id="task_number" name="task_number">
+    <div class="container">
+        <h2>📊 Отчет о выполнении</h2>
         
-        <div class="form-group">
-            <label>Фактические трудозатраты (часы):</label>
-            <input type="number" id="actual_hours" step="0.01" min="0" placeholder="Например: 3.5">
-            <div class="hint">Укажите потраченное время в часах (опционально)</div>
+        <div class="task-info">
+            <strong>Задача №:</strong> <span id="taskNumber"></span><br>
+            <strong>Исполнитель:</strong> @<span id="userName"></span>
         </div>
         
-        <div class="form-group">
-            <label>Описание работ: <span class="required">*</span></label>
-            <textarea id="work_description" placeholder="Опишите выполненные работы..." required></textarea>
-            <div class="hint">Обязательное поле</div>
-            <div class="error-message" id="error_description">Обязательное поле</div>
-        </div>
+        <form id="reportForm">
+            <div class="form-group">
+                <label>Фактические трудозатраты (часы):</label>
+                <div class="quick-buttons">
+                    <button type="button" class="quick-btn" data-hours="1">1 ч</button>
+                    <button type="button" class="quick-btn" data-hours="2">2 ч</button>
+                    <button type="button" class="quick-btn" data-hours="4">4 ч</button>
+                    <button type="button" class="quick-btn" data-hours="8">8 ч</button>
+                </div>
+                <input type="number" id="actual_hours" step="0.25" min="0.25" required placeholder="Или введите точное значение">
+                <div class="hint">Можно указывать с точностью до 0.25 часа (15 минут)</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Описание выполненных работ:</label>
+                <textarea id="work_description" required placeholder="Подробно опишите что было сделано..."></textarea>
+                <div class="hint">Укажите основные выполненные задачи и особенности реализации</div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Отправить отчет</button>
+        </form>
         
-        <button type="submit" class="submit-btn" id="submitBtn">Отправить отчет</button>
-    </form>
-    
-    <div class="success-message" id="successMsg">
-        ✅ Отчет успешно отправлен!<br>Можете закрыть эту страницу.
+        <div class="message success" id="successMsg">
+            ✅ Отчет успешно отправлен!<br>
+            <small>Можете закрыть эту страницу</small>
+        </div>
+        <div class="message error" id="errorMsg"></div>
     </div>
-
+    
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const taskNumber = urlParams.get('task');
-        const baseURL = urlParams.get('base_url');
+        const userName = urlParams.get('user');
+        const token = urlParams.get('token');
         
-        document.getElementById('task_number').value = taskNumber;
+        // ВАЖНО: замените на ваш реальный URL
+        const API_URL = 'https://ваш-сервер.ru/ИмяПубликации/hs/UU_FormHandler/submit';
         
+        document.getElementById('taskNumber').textContent = taskNumber;
+        document.getElementById('userName').textContent = userName;
+        
+        // Быстрый выбор часов
+        const quickButtons = document.querySelectorAll('.quick-btn');
+        const hoursInput = document.getElementById('actual_hours');
+        
+        quickButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const hours = this.getAttribute('data-hours');
+                hoursInput.value = hours;
+                
+                // Визуальное выделение
+                quickButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // Сброс выделения при ручном вводе
+        hoursInput.addEventListener('input', function() {
+            quickButtons.forEach(b => b.classList.remove('active'));
+        });
+        
+        // Отправка формы
         document.getElementById('reportForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            let workDescription = document.getElementById('work_description').value.trim();
-            let actualHours = document.getElementById('actual_hours').value.trim();
+            const actualHours = parseFloat(document.getElementById('actual_hours').value);
+            const workDescription = document.getElementById('work_description').value.trim();
             
-            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
-            
-            if (!workDescription) {
-                document.getElementById('error_description').classList.add('show');
+            // Валидация
+            if (actualHours <= 0) {
+                showError('Укажите корректное время выполнения');
                 return;
             }
+            
+            if (workDescription.length < 10) {
+                showError('Описание работ слишком короткое (минимум 10 символов)');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Отправка...';
             
             const data = {
                 form_type: 'report',
                 task_number: taskNumber,
-                actual_hours: actualHours ? parseFloat(actualHours) : 0,
+                user_name: userName,
+                token: token,
+                actual_hours: actualHours,
                 work_description: workDescription
             };
             
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.textContent = 'Отправка...';
-            
             try {
-                const response = await fetch(baseURL + '/hs/webapp/submit', {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(data)
                 });
                 
-                if (response.ok) {
-                    document.getElementById('reportForm').style.display = 'none';
-                    document.getElementById('successMsg').style.display = 'block';
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess();
                 } else {
-                    alert('Ошибка отправки данных. Попробуйте ещё раз.');
-                    btn.disabled = false;
-                    btn.textContent = 'Отправить отчет';
+                    showError(result.error || 'Ошибка отправки');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Отправить отчет';
                 }
+                
             } catch (error) {
-                alert('Ошибка соединения с сервером.');
-                btn.disabled = false;
-                btn.textContent = 'Отправить отчет';
+                showError('Ошибка соединения с сервером: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Отправить отчет';
             }
         });
+        
+        function showSuccess() {
+            document.getElementById('successMsg').style.display = 'block';
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('reportForm').style.display = 'none';
+        }
+        
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = '❌ ' + message;
+            errorMsg.style.display = 'block';
+            document.getElementById('successMsg').style.display = 'none';
+        }
     </script>
 </body>
 </html>
